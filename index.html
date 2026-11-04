@@ -95,6 +95,13 @@
   }
   .intro { color: var(--muted); font-size: 15px; margin-bottom: 10px; }
   .intro:last-of-type { margin-bottom: 6px; }
+  .preview-only-banner {
+    margin: 16px 0 6px; padding: 14px 16px;
+    border: 1px solid var(--teal-line); border-left: 4px solid var(--teal);
+    border-radius: 12px; background: var(--teal-tint); color: var(--navy);
+    font-size: 14px; line-height: 1.55;
+  }
+  .preview-only-banner strong { display: block; margin-bottom: 3px; }
 
   /* ---------- Questions ---------- */
   .q { padding: clamp(20px, 4vw, 26px) 0; border-top: 1px solid var(--line); }
@@ -231,6 +238,7 @@
     filter: brightness(0.97);
     box-shadow: 0 1px 2px oklch(0.42 0.065 185 / 0.35);
   }
+  button[type="submit"]:disabled { cursor: not-allowed; opacity: .68; filter: saturate(.35); }
 
   .note { font-size: 13px; color: var(--muted); text-align: center; margin-top: 16px; line-height: 1.55; }
   .note b { color: var(--ink); }
@@ -279,7 +287,8 @@
     <div class="eyebrow">Business Connect</div>
     <h1>Naic Business Directory Survey</h1>
     <p class="intro">Good day! We are building a website to help people find businesses in Naic. Each business gets a simple page, called a listing, that shows its name, what it offers, and where it is.</p>
-    <p class="intro">Please answer a few quick questions below. This is research only, there is no commitment to join or pay.</p>
+    <p class="intro">This preview shows four questions about a free listing, usefulness, concerns, and a possible paid upgrade. There is no commitment to join or pay.</p>
+    <div class="preview-only-banner" role="status"><strong>Preview only — responses are not being collected.</strong>Anything entered here will not be sent or saved. Please do not enter real answers yet.</div>
 
     <form id="survey-form" data-od-id="survey-form">
 
@@ -342,7 +351,8 @@
         </div>
       </div>
 
-      <button type="submit" data-od-id="survey-submit">Submit answers</button>
+      <button type="submit" data-od-id="survey-submit" disabled aria-describedby="survey-preview-status">Survey is not accepting responses</button>
+      <span id="survey-preview-status" class="optional">The survey response destination is not ready.</span>
       <div class="note">This is research only, no commitment to join or pay. Once the website is created, we will send you an invite to claim your listing. God bless you and may your business thrive even more.</div>
     </form>
   </div>
@@ -382,9 +392,6 @@
 
   document.getElementById('survey-form').addEventListener('submit', function (e) {
     e.preventDefault();
-    document.getElementById('form-card').style.display = 'none';
-    document.getElementById('thanks-card').style.display = 'block';
-    window.scrollTo(0, 0);
   });
 </script>
 </body>
