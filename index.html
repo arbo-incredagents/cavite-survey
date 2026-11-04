@@ -29,6 +29,7 @@
     --grad-accent: linear-gradient(120deg, var(--teal) 0%, var(--cobalt) 100%);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  [hidden] { display: none !important; }
   html { -webkit-text-size-adjust: 100%; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, Helvetica, Arial, sans-serif;
@@ -240,6 +241,13 @@
   }
   button[type="submit"]:disabled { cursor: not-allowed; opacity: .68; filter: saturate(.35); }
 
+  .survey-status, .survey-consent { display: block; margin: 18px 0; padding: 14px 16px; border: 1px solid var(--teal-line); border-radius: 12px; background: var(--teal-tint); color: var(--ink); font-size: 14px; }
+  .survey-status:empty { display: none; }
+  .survey-consent label { display: flex; align-items: flex-start; gap: 10px; }
+  .survey-consent input { margin-top: 5px; }
+  .survey-error { border-color: #d97706; background: #fff7ed; }
+  .honey-field { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+
   .note { font-size: 13px; color: var(--muted); text-align: center; margin-top: 16px; line-height: 1.55; }
   .note b { color: var(--ink); }
 
@@ -288,21 +296,21 @@
     <h1>Naic Business Directory Survey</h1>
     <p class="intro">Good day! We are building a website to help people find businesses in Naic. Each business gets a simple page, called a listing, that shows its name, what it offers, and where it is.</p>
     <p class="intro">This preview shows four questions about a free listing, usefulness, concerns, and a possible paid upgrade. There is no commitment to join or pay.</p>
-    <div class="preview-only-banner" role="status"><strong>Preview only — responses are not being collected.</strong>Anything entered here will not be sent or saved. Please do not enter real answers yet.</div>
+    <div id="survey-status" class="survey-status" role="status" aria-live="polite">Preview only — responses are not being collected. Anything entered here will not be sent or saved.</div>
 
     <form id="survey-form" data-od-id="survey-form">
 
       <div class="q" data-od-id="question-business-name">
         <div class="q-label">Your business name <span class="optional">(optional)</span></div>
         <div class="text-line">
-          <input type="text" placeholder="Business name" />
+          <input type="text" name="businessName" maxlength="120" autocomplete="organization" placeholder="Business name" />
         </div>
       </div>
 
       <div class="q" data-od-id="question-1">
         <div class="q-label">1. Would you be interested in having a free basic listing page for your business?</div>
         <div class="opts" data-name="q1">
-          <label class="opt"><input type="radio" name="q1" value="yes" /><span>Yes</span></label>
+          <label class="opt"><input type="radio" name="q1" value="yes" required /><span>Yes</span></label>
           <label class="opt"><input type="radio" name="q1" value="maybe" /><span>Maybe</span></label>
           <label class="opt"><input type="radio" name="q1" value="no" /><span>No</span></label>
         </div>
@@ -312,7 +320,7 @@
         <div class="q-label">2. Would a website like this be useful to you?</div>
         <div class="q-help">For example, helping people find your shop or showing accurate information about your business.</div>
         <div class="opts" data-name="q2">
-          <label class="opt"><input type="radio" name="q2" value="yes" /><span>Yes</span></label>
+          <label class="opt"><input type="radio" name="q2" value="yes" required /><span>Yes</span></label>
           <label class="opt"><input type="radio" name="q2" value="maybe" /><span>Maybe</span></label>
           <label class="opt"><input type="radio" name="q2" value="no" /><span>No</span></label>
         </div>
@@ -321,11 +329,11 @@
       <div class="q" data-od-id="question-3">
         <div class="q-label">3. Is there anything that would make you hesitate to join?</div>
         <div class="opts" data-name="q3">
-          <label class="opt"><input type="radio" name="q3" value="none" /><span>No, nothing</span></label>
+          <label class="opt"><input type="radio" name="q3" value="none" required /><span>No, nothing</span></label>
           <label class="opt"><input type="radio" name="q3" value="yes" /><span>Yes, (please tell us what)</span></label>
         </div>
         <div class="sub" data-for="q3">
-          <textarea rows="3" placeholder="Tell us what would make you hesitate."></textarea>
+          <textarea name="hesitation" rows="3" maxlength="1200" placeholder="Tell us what would make you hesitate." disabled></textarea>
         </div>
       </div>
 
@@ -339,7 +347,7 @@
         <div class="sub" data-for="q4" data-show-on="amount">
           <div class="peso-line">
             <span class="peso-sign">&#8369;</span>
-            <input type="number" min="0" step="1" placeholder="Enter amount per month" aria-label="Amount per month in Philippine pesos" disabled />
+            <input type="number" name="priceAmount" min="0" max="1000000" step="1" placeholder="Enter amount per month" aria-label="Amount per month in Philippine pesos" disabled />
           </div>
         </div>
       </div>
@@ -347,12 +355,16 @@
       <div class="q" data-od-id="question-feedback">
         <div class="q-label">Any other feedback? <span class="optional">(optional)</span></div>
         <div class="text-line">
-          <textarea rows="3" placeholder="Share any other thoughts or suggestions"></textarea>
+          <textarea name="additionalFeedback" rows="3" maxlength="1200" placeholder="Share any other thoughts or suggestions"></textarea>
         </div>
       </div>
 
-      <button type="submit" data-od-id="survey-submit" disabled aria-describedby="survey-preview-status">Survey is not accepting responses</button>
-      <span id="survey-preview-status" class="optional">The survey response destination is not ready.</span>
+      <div class="survey-consent" id="survey-consent" hidden>
+        <p><a id="privacy-notice-link" href="#" target="_blank" rel="noopener noreferrer">Read the survey privacy information</a></p>
+        <label><input type="checkbox" name="noticeAcknowledged" required /> I have read the privacy information and agree to take part in this survey.</label>
+      </div>
+      <div class="honey-field" aria-hidden="true"><label>Leave this field blank<input name="website" tabindex="-1" autocomplete="off" /></label></div>
+      <button type="submit" data-od-id="survey-submit" disabled aria-describedby="survey-status">Survey is not accepting responses</button>
       <div class="note">This is research only, no commitment to join or pay. Once the website is created, we will send you an invite to claim your listing. God bless you and may your business thrive even more.</div>
     </form>
   </div>
@@ -363,12 +375,53 @@
     </div>
     <h2>Thank you!</h2>
     <p>Thank you for your feedback.</p>
-    <p class="note">This preview does not send or store your answers.</p>
+    <p class="note">Your answers were submitted successfully. There is no commitment to join or pay.</p>
   </div>
 
 </div>
 
+<script src="./survey-config.js"></script>
 <script>
+  var surveyConfig = window.SURVEY_CONFIG || {};
+  var surveyForm = document.getElementById('survey-form');
+  var surveySubmit = surveyForm.querySelector('button[type="submit"]');
+  var surveyStatus = document.getElementById('survey-status');
+  var surveyConsent = document.getElementById('survey-consent');
+  var privacyLink = document.getElementById('privacy-notice-link');
+  var pendingIdempotencyKey = '';
+  var endpointUrl = '';
+
+  function setStatus(message, isError) {
+    surveyStatus.textContent = message;
+    surveyStatus.classList.toggle('survey-error', Boolean(isError));
+  }
+
+  function enableSubmission() {
+    surveyConsent.hidden = false;
+    privacyLink.href = surveyConfig.privacyNoticeUrl;
+    surveySubmit.disabled = false;
+    surveySubmit.textContent = 'Submit answers';
+    setStatus('Please review the privacy information before submitting your answers.', false);
+  }
+
+  function initializeSubmission() {
+    if (surveyConfig.enabled !== true || !surveyConfig.apiUrl || !surveyConfig.privacyNoticeUrl || !surveyConfig.noticeVersion) return;
+    try {
+      endpointUrl = new URL(surveyConfig.apiUrl, window.location.href).toString();
+      var api = new URL(endpointUrl);
+      if (api.protocol !== 'https:' && !['localhost', '127.0.0.1', '[::1]'].includes(api.hostname)) return;
+      var notice = new URL(surveyConfig.privacyNoticeUrl, window.location.href);
+      if (notice.protocol !== 'https:' && !['localhost', '127.0.0.1', '[::1]'].includes(notice.hostname)) return;
+    } catch { return; }
+    fetch(endpointUrl, { method: 'GET', mode: 'cors', credentials: 'omit', cache: 'no-store' })
+      .then(function (response) { return response.ok ? response.json() : null; })
+      .then(function (status) {
+        if (status && status.acceptingResponses === true) enableSubmission();
+        else setStatus('The survey is not accepting responses right now. Your answers will not be sent.', false);
+      })
+      .catch(function () { setStatus('The survey response service is unavailable. Your answers have not been sent.', true); });
+  }
+
   document.querySelectorAll('.opts').forEach(function (group) {
     var name = group.getAttribute('data-name');
     group.querySelectorAll('input[type="radio"]').forEach(function (radio) {
@@ -381,18 +434,59 @@
           var isVisible = radio.value === showOn;
           sub.style.display = isVisible ? 'block' : 'none';
           var conditionalInput = sub.querySelector('input, textarea');
-          if (conditionalInput && conditionalInput.type === 'number') {
+          if (conditionalInput) {
             conditionalInput.disabled = !isVisible;
-            conditionalInput.required = isVisible;
+            conditionalInput.required = isVisible && (conditionalInput.type === 'number' || name === 'q3');
           }
         }
       });
     });
   });
 
-  document.getElementById('survey-form').addEventListener('submit', function (e) {
+  surveyForm.addEventListener('input', function () { pendingIdempotencyKey = ''; });
+  surveyForm.addEventListener('change', function () { pendingIdempotencyKey = ''; });
+  surveyForm.addEventListener('submit', async function (e) {
     e.preventDefault();
+    if (!endpointUrl || surveySubmit.disabled) return;
+    var values = new FormData(surveyForm);
+    var priceChoice = values.get('q4');
+    var hesitationChoice = values.get('q3');
+    var payload = {
+      idempotencyKey: pendingIdempotencyKey || (window.crypto && window.crypto.randomUUID ? window.crypto.randomUUID() : ''),
+      surveyVersion: surveyConfig.surveyVersion || 'survey-v1',
+      noticeVersion: surveyConfig.noticeVersion,
+      noticeAcknowledged: values.get('noticeAcknowledged') === 'on',
+      businessName: values.get('businessName') || '',
+      interest: values.get('q1'),
+      usefulness: values.get('q2'),
+      hesitationChoice: hesitationChoice,
+      hesitation: hesitationChoice === 'yes' ? values.get('hesitation') || '' : '',
+      priceChoice: priceChoice,
+      priceAmount: priceChoice === 'amount' ? Number(values.get('priceAmount')) : null,
+      additionalFeedback: values.get('additionalFeedback') || '',
+      website: values.get('website') || ''
+    };
+    if (!payload.idempotencyKey) {
+      setStatus('This browser cannot securely submit the form. Please open it in a current browser over HTTPS.', true);
+      return;
+    }
+    pendingIdempotencyKey = payload.idempotencyKey;
+    surveySubmit.disabled = true;
+    surveySubmit.textContent = 'Submitting…';
+    setStatus('Submitting your answers securely…', false);
+    try {
+      var response = await fetch(endpointUrl, { method: 'POST', mode: 'cors', credentials: 'omit', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload), cache: 'no-store' });
+      var result = await response.json().catch(function () { return {}; });
+      if (!response.ok || result.submitted !== true) throw new Error(result.error || 'Your answers could not be submitted. Please try again.');
+      document.getElementById('form-card').style.display = 'none';
+      document.getElementById('thanks-card').style.display = 'block';
+    } catch (error) {
+      surveySubmit.disabled = false;
+      surveySubmit.textContent = 'Try submitting again';
+      setStatus(error instanceof Error ? error.message : 'Your answers could not be submitted. Please try again.', true);
+    }
   });
+  initializeSubmission();
 </script>
 </body>
 </html>
