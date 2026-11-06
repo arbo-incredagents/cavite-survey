@@ -362,8 +362,10 @@
       </div>
 
       <div class="survey-consent" id="survey-consent" hidden>
-        <p><a id="privacy-notice-link" href="#" target="_blank" rel="noopener noreferrer">Read the survey privacy information</a></p>
-        <label><input type="checkbox" name="noticeAcknowledged" required /> I have read the privacy information and agree to take part in this survey.</label>
+        <p>Taking part is optional. You may leave this form without submitting.</p>
+        <p><a id="privacy-notice-link" href="#" target="_blank" rel="noopener noreferrer">Read the survey Privacy Notice</a></p>
+        <label><input type="checkbox" name="noticeAcknowledged" required /> I have read the survey Privacy Notice.</label>
+        <label><input type="checkbox" name="participationConsent" required /> I voluntarily agree to the use of my survey answers for the research described in the notice.</label>
       </div>
       <div class="honey-field" aria-hidden="true"><label>Leave this field blank<input name="website" tabindex="-1" autocomplete="off" /></label></div>
       <button type="submit" data-od-id="survey-submit" disabled aria-describedby="survey-status">Survey is not accepting responses yet</button>
@@ -398,16 +400,20 @@
     surveyStatus.classList.toggle('survey-error', Boolean(isError));
   }
 
-  function enableSubmission() {
-    surveyConsent.hidden = false;
+  function configureConsentPanel() {
+    if (!surveyConfig.privacyNoticeUrl) return;
     privacyLink.href = surveyConfig.privacyNoticeUrl;
+    surveyConsent.hidden = false;
+  }
+
+  function enableSubmission() {
     surveySubmit.disabled = false;
     surveySubmit.textContent = 'Submit answers';
     setStatus('Please review the privacy information before submitting your answers.', false);
   }
 
   function initializeSubmission() {
-    if (surveyConfig.enabled !== true || !surveyConfig.apiUrl || !surveyConfig.privacyNoticeUrl || !surveyConfig.noticeVersion) return;
+    if (surveyConfig.enabled !== true || !surveyConfig.apiUrl || !surveyConfig.privacyNoticeUrl || !surveyConfig.noticeVersion || !surveyConfig.consentVersion) return;
     try {
       endpointUrl = new URL(surveyConfig.apiUrl, window.location.href).toString();
       var api = new URL(endpointUrl);
@@ -458,6 +464,8 @@
       surveyVersion: surveyConfig.surveyVersion || 'survey-v1',
       noticeVersion: surveyConfig.noticeVersion,
       noticeAcknowledged: values.get('noticeAcknowledged') === 'on',
+      participationConsent: values.get('participationConsent') === 'on',
+      consentVersion: surveyConfig.consentVersion,
       businessName: values.get('businessName') || '',
       interest: values.get('q1'),
       usefulness: values.get('q2'),
@@ -488,6 +496,7 @@
       setStatus(error instanceof Error ? error.message : 'Your answers could not be submitted. Please try again.', true);
     }
   });
+  configureConsentPanel();
   initializeSubmission();
 </script>
 </body>
