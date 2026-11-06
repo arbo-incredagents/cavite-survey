@@ -2,7 +2,7 @@
 window.SURVEY_CONFIG = Object.freeze({
   enabled: false,
   apiUrl: 'https://143-244-189-197.nip.io/api/survey/submissions',
-  privacyNoticeUrl: '',
-  noticeVersion: '',
+  privacyNoticeUrl: 'https://arbo-incredagents.github.io/cavite-survey/privacy.html',
+  noticeVersion: 'privacy-notice-2026-11-06',
   surveyVersion: 'survey-v1',
 })
