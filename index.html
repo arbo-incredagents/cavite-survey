@@ -246,7 +246,7 @@
   .survey-consent label { display: flex; align-items: flex-start; gap: 10px; }
   .survey-consent input { margin-top: 5px; }
   .survey-error { border-color: #d97706; background: #fff7ed; }
-  .honey-field { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+  .honey-field { display: none !important; }
 
   .note { font-size: 13px; color: var(--muted); text-align: center; margin-top: 16px; line-height: 1.55; }
   .note b { color: var(--ink); }
@@ -367,7 +367,7 @@
         <label><input type="checkbox" name="noticeAcknowledged" required /> I have read the survey Privacy Notice.</label>
         <label><input type="checkbox" name="participationConsent" required /> I voluntarily agree to the use of my survey answers for the research described in the notice.</label>
       </div>
-      <div class="honey-field" aria-hidden="true"><label>Leave this field blank<input name="website" tabindex="-1" autocomplete="off" /></label></div>
+      <div class="honey-field" aria-hidden="true"><input type="text" name="website" tabindex="-1" autocomplete="off" /></div>
       <button type="submit" data-od-id="survey-submit" disabled aria-describedby="survey-status">Survey is not accepting responses yet</button>
       <div class="note">This is research only, no commitment to join or pay. Once the website is created, we will send you an invite to claim your listing. God bless you and may your business thrive even more.</div>
     </form>
