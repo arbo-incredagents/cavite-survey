@@ -96,14 +96,6 @@
   }
   .intro { color: var(--muted); font-size: 15px; margin-bottom: 10px; }
   .intro:last-of-type { margin-bottom: 6px; }
-  .preview-only-banner {
-    margin: 16px 0 6px; padding: 14px 16px;
-    border: 1px solid var(--teal-line); border-left: 4px solid var(--teal);
-    border-radius: 12px; background: var(--teal-tint); color: var(--navy);
-    font-size: 14px; line-height: 1.55;
-  }
-  .preview-only-banner strong { display: block; margin-bottom: 3px; }
-
   /* ---------- Questions ---------- */
   .q { padding: clamp(20px, 4vw, 26px) 0; border-top: 1px solid var(--line); }
   .q:first-of-type { border-top: none; padding-top: 8px; }
@@ -295,7 +287,7 @@
     <div class="eyebrow">Business Connect</div>
     <h1>Cavite Business Connect Survey</h1>
     <p class="intro">Good day! We are building a website to help people find businesses in Naic. Each business gets a simple page, called a listing, that shows its name, what it offers, and where it is.</p>
-    <p class="intro">This preview shows four questions about a free listing, usefulness, concerns, and a possible paid upgrade. There is no commitment to join or pay.</p>
+    <p class="intro">This survey asks four short questions about a free listing, usefulness, concerns, and a possible paid upgrade. Taking part is optional; there is no commitment to join or pay.</p>
     <p class="intro">A listing currently shows the business name, category, a short description, and location. It may also include a website or Google Maps link when available. Phone numbers, email addresses, and photos are not shown in the public directory.</p>
     <p class="intro"><strong>Questions about a directory listing?</strong> The project has not opened a separate formal listing-correction or removal service. To ask what options are available, message the <a href="https://www.facebook.com/profile.php?id=61596438082629" target="_blank" rel="noopener noreferrer">Cavite Business Connect Facebook Page</a> with the business name and the change or removal you are asking about. A message asks for guidance; it does not confirm that a listing will be changed or removed. This survey does not submit listing requests.</p>
     <div id="survey-status" class="survey-status" role="status" aria-live="polite"></div>
@@ -369,7 +361,7 @@
       </div>
       <!-- Honeypot contract: keep id/name "website" aligned with the submission payload. -->
       <div class="honey-field" aria-hidden="true"><input id="website" name="website" type="text" autocomplete="off" tabindex="-1" /></div>
-      <button type="submit" data-od-id="survey-submit" disabled aria-describedby="survey-status">Survey is not accepting responses yet</button>
+      <button type="submit" data-od-id="survey-submit" disabled aria-describedby="survey-status">Checking survey availability…</button>
       <div class="note">This is research only, no commitment to join or pay. Once the website is created, we will send you an invite to claim your listing. God bless you and may your business thrive even more.</div>
     </form>
   </div>
@@ -413,22 +405,34 @@
     setStatus('Please review the privacy information before submitting your answers.', false);
   }
 
+  function disableSubmission(message, isError) {
+    surveySubmit.disabled = true;
+    surveySubmit.textContent = 'Survey temporarily unavailable';
+    setStatus(message, isError);
+  }
+
   function initializeSubmission() {
-    if (surveyConfig.enabled !== true || !surveyConfig.apiUrl || !surveyConfig.privacyNoticeUrl || !surveyConfig.noticeVersion || !surveyConfig.consentVersion) return;
+    if (surveyConfig.enabled !== true || !surveyConfig.apiUrl || !surveyConfig.privacyNoticeUrl || !surveyConfig.noticeVersion || !surveyConfig.consentVersion) {
+      disableSubmission('The survey is not accepting responses right now. Your answers have not been sent.', false);
+      return;
+    }
     try {
       endpointUrl = new URL(surveyConfig.apiUrl, window.location.href).toString();
       var api = new URL(endpointUrl);
       if (api.protocol !== 'https:' && !['localhost', '127.0.0.1', '[::1]'].includes(api.hostname)) return;
       var notice = new URL(surveyConfig.privacyNoticeUrl, window.location.href);
       if (notice.protocol !== 'https:' && !['localhost', '127.0.0.1', '[::1]'].includes(notice.hostname)) return;
-    } catch { return; }
+    } catch {
+      disableSubmission('The survey setup is unavailable right now. Your answers have not been sent.', true);
+      return;
+    }
     fetch(endpointUrl, { method: 'GET', mode: 'cors', credentials: 'omit', cache: 'no-store' })
       .then(function (response) { return response.ok ? response.json() : null; })
       .then(function (status) {
         if (status && status.acceptingResponses === true) enableSubmission();
-        else setStatus('The survey is not accepting responses right now. Your answers will not be sent.', false);
+        else disableSubmission('The survey is not accepting responses right now. Your answers have not been sent.', false);
       })
-      .catch(function () { setStatus('The survey response service is unavailable. Your answers have not been sent.', true); });
+      .catch(function () { disableSubmission('The survey response service is unavailable. Your answers have not been sent.', true); });
   }
 
   document.querySelectorAll('.opts').forEach(function (group) {
